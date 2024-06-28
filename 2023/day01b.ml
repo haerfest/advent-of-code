@@ -46,8 +46,7 @@ let solve sum line =
         let line' = to_chars line in
         let (chars_left, chars_right) = (first_word left_to_right line', first_word right_to_left (List.rev line')) in
         let (word_left, word_right) = (to_word chars_left, to_word (List.rev chars_right)) in
-        let (value_left, value_right) = (value word_left, value word_right) in
-        sum + 10 * value_left + value_right 
+        sum + 10 * (value word_left) + (value word_right)
 
 let () =
         Printf.printf "%d\n" (In_channel.with_open_text "input.txt" (In_channel.fold_lines solve 0))
