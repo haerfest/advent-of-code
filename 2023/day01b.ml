@@ -11,12 +11,10 @@ let words = [
         "9"; "nine"
 ]
 
-exception InvalidInput
-
 let value word =
         match List.find_index ((=) word) words with
         | Some index -> index / 2
-        | None -> raise InvalidInput
+        | None -> -1
 
 let to_chars word =
         word |> String.to_seq |> List.of_seq
@@ -40,10 +38,9 @@ let starts_with word line =
         inner 0 0 (List.length word) (List.length line)
 
 let rec first_word words line =
-        if List.is_empty line then raise InvalidInput
-        else match List.filter (fun word -> starts_with word line) words with
-                | word :: _ -> word
-                | [] -> first_word words (List.tl line)
+        match List.filter (fun word -> starts_with word line) words with
+        | word :: _ -> word
+        | _ -> first_word words (List.tl line)
 
 let solve sum line =
         let line' = to_chars line in
