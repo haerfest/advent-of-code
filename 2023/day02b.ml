@@ -15,19 +15,20 @@ let component_to_rgb component =
 (* A draw is a single draw of up to three colors, e.g. "3 red, 1 green, 5 blue", which is
  * converted to (3, 1, 5). *)
 let draw_to_rgb draw =
-        let components = String.split_on_char ',' draw in
-        let rgbs = List.map component_to_rgb components in
-        List.fold_left max3 (0, 0, 0) rgbs
+        String.split_on_char ',' draw
+        |> List.map component_to_rgb
+        |> List.fold_left max3 (0, 0, 0)
 
 let power (r, g, b) =
         r * g * b
 
 let solve sum line =
-        let draws = List.nth (String.split_on_char ':' line) 1 in
-        let draws' = String.split_on_char ';' draws in
-        let rgbs = List.map draw_to_rgb draws' in
-        let rgb  = List.fold_left max3 (0, 0, 0) rgbs in
-        sum + power rgb
+        List.nth (String.split_on_char ':' line) 1
+        |> String.split_on_char ';'
+        |> List.map draw_to_rgb
+        |> List.fold_left max3 (0, 0, 0)
+        |> power
+        |> (+) sum
 
 let () =
         Printf.printf "%d\n" (In_channel.with_open_text "input.txt" (In_channel.fold_lines solve 0))
