@@ -1,4 +1,6 @@
-type item = Number of int * int * int * int | Symbol of char * int * int
+type item =
+  | Number of int * int * int * int
+  | Symbol of char * int * int
 
 let to_string item =
   match item with
