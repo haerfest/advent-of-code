@@ -1,39 +1,43 @@
+open In_channel
+open Printf
+open String
+
 type item =
   | Number of int * int * int * int
   | Symbol of char * int * int
 
 let to_string = function
-  | Number (value, length, row, column) ->
-      Printf.sprintf "Number (%d, %d, %d, %d)" value length row column
+  | Number (value, nr_digits, row, column) ->
+      sprintf "Number (%d, %d, %d, %d)" value nr_digits row column
   | Symbol (character, row, column) ->
-      Printf.sprintf "Symbol ('%c', %d, %d)" character row column
+      sprintf "Symbol ('%c', %d, %d)" character row column
 
 let value_of character = Char.code character - Char.code '0'
 
 let parse_number line column =
-  let rec parse value length =
-    if column + length = String.length line then (value, length)
+  let rec parse value nr_digits =
+    if column + nr_digits = length line then (value, nr_digits)
     else
-      let character = line.[column + length] in
+      let character = line.[column + nr_digits] in
       match character with
       | '0' .. '9' ->
          let value = (value * 10) + value_of character in
-         parse value (length + 1)
-      | _ -> (value, length)
+         parse value (nr_digits + 1)
+      | _ -> (value, nr_digits)
   in
   parse 0 0
 
 let rec parse_line' line row column items =
-  if column = String.length line then items
+  if column = length line then items
   else
     let character = line.[column] in
     match character with
     | '.' ->
        parse_line' line row (column + 1) items
     | '0' .. '9' ->
-       let value, length = parse_number line column in
-       let number = Number (value, length, row, column) in
-       parse_line' line row (column + length) (number :: items)
+       let value, nr_digits = parse_number line column in
+       let number = Number (value, nr_digits, row, column) in
+       parse_line' line row (column + nr_digits) (number :: items)
     | _ ->
        let symbol = Symbol (character, row, column) in
        parse_line' line row (column + 1) (symbol :: items)
@@ -41,7 +45,7 @@ let rec parse_line' line row column items =
 let parse_line line row items = parse_line' line row 0 items
 
 let rec parse_lines' channel row items =
-  match In_channel.input_line channel with
+  match input_line channel with
   | Some line ->
      let items = parse_line line row items in
      parse_lines' channel (row + 1) items
@@ -51,7 +55,8 @@ let parse_lines channel = parse_lines' channel 0 []
 
 let solve channel =
   let items = parse_lines channel in
-  List.iter (fun item -> print_endline (to_string item)) items ;
-  List.length items
+  let open List in
+  iter (fun item -> print_endline (to_string item)) items ;
+  length items
 
-let () = Printf.printf "%d\n" (In_channel.with_open_text "input.txt" solve)
+let () = printf "%d\n" (with_open_text "input.txt" solve)
