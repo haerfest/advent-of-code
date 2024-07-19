@@ -11,20 +11,28 @@ let parse_line (seeds, maps) line =
   | _ -> failwith "invalid input"
 
 let parse_channel channel =
-  In_channel.fold_lines parse_line ([], []) channel
+  let (seeds, maps) = In_channel.fold_lines parse_line ([], []) channel in
+  (seeds, List.rev maps)
 
-let print_range { dst = d; src = s; len = l } =
-  Printf.printf "  { dst = %#d; src = %#d; len = %#d }\n" d s l
+let rec find map value =
+  match map with
+  | [] -> value
+  | { dst = dst; src = src; len = len } :: rest ->
+     if value >= src && value < src + len then
+       dst + value - src
+     else
+       find rest value
 
-let print_map map =
-  Printf.printf "[\n";
-  List.iter print_range map;
-  Printf.printf "]\n"
+let rec trace maps value =
+  match maps with
+  | [] -> value
+  | map :: rest -> trace rest (find map value)
 
 let solve channel =
   let (seeds, maps) = parse_channel channel in
-  List.iter print_map maps;
-  0
+  let locations = List.map (trace maps) seeds in
+  let ordered = List.sort compare locations in
+  List.hd ordered
 
 let main =
   Printf.printf "%d\n" @@ In_channel.with_open_text "input.txt" solve
