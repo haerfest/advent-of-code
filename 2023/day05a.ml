@@ -2,17 +2,17 @@ type range = { dst: int; src: int; len: int }
 
 let ios = int_of_string
 
-let parse_line (seeds, maps) line =
-  match String.split_on_char ' ' line with
-  | "seeds:" :: seeds -> (List.map ios seeds, maps)
-  | [_; "map:"] -> (seeds, [] :: maps)
-  | [d; s; l] -> (seeds, ({ dst = ios d; src = ios s; len = ios l } :: List.hd maps) :: List.tl maps)
-  | [""] -> (seeds, maps)
+let parse_line (seeds, map, maps) line =
+  match line |> String.split_on_char ' ' with
+  | "seeds:" :: seeds -> (List.map ios seeds, map, maps)
+  | [_; "map:"] -> (seeds, [], map :: maps)
+  | [dst; src; len] -> (seeds, { dst = ios dst; src = ios src; len = ios len } :: map, maps)
+  | [""] -> (seeds, map, maps)
   | _ -> failwith "invalid input"
 
 let parse_channel channel =
-  let (seeds, maps) = In_channel.fold_lines parse_line ([], []) channel in
-  (seeds, List.rev maps)
+  let (seeds, map, maps) = channel |> In_channel.fold_lines parse_line ([], [], []) in
+  (seeds, List.rev (map :: maps))
 
 let rec find map value =
   match map with
